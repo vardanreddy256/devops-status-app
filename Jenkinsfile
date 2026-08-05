@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     stages {
+
         stage('Checkout') {
             steps {
                 echo 'Source code checked out from GitHub'
@@ -25,7 +26,11 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo 'Building Docker image...'
-                sh 'DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock docker build -t devops-status-app .'
+
+                sh '''
+                    DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock \
+                    docker build -t devops-status-app .
+                '''
             }
         }
 
@@ -38,23 +43,49 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
+
                     sh '''
-                        echo "$DOCKER_PASS" | DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock docker login -u "$DOCKER_USER" --password-stdin
-                        DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock docker tag devops-status-app:latest vardan3236/devops-status-app:latest
-                        DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock docker push vardan3236/devops-status-app:latest
+                        echo "$DOCKER_PASS" | \
+                        DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock \
+                        docker login -u "$DOCKER_USER" --password-stdin
+
+                        DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock \
+                        docker tag devops-status-app:latest \
+                        vardan3236/devops-status-app:latest
+
+                        DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock \
+                        docker push vardan3236/devops-status-app:latest
                     '''
                 }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying latest Docker image...'
+
+                sh '''
+                    DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock \
+                    docker rm -f devops-status-container || true
+
+                    DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock \
+                    docker pull vardan3236/devops-status-app:latest
+
+                    DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock \
+                    docker run --name devops-status-container \
+                    vardan3236/devops-status-app:latest
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'CI Pipeline completed successfully!'
+            echo 'CI/CD Pipeline completed successfully!'
         }
 
         failure {
-            echo 'CI Pipeline failed!'
+            echo 'CI/CD Pipeline failed!'
         }
     }
 }
