@@ -21,6 +21,12 @@ pipeline {
                 sh 'mvn test'
             }
         }
+        stage('Docker Build') {
+    steps {
+        echo 'Building Docker image...'
+        sh 'docker --context desktop-linux build -t devops-status-app .'
+    }
+}
     }
 
     post {
