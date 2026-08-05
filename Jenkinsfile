@@ -24,7 +24,7 @@ pipeline {
         stage('Docker Build') {
     steps {
         echo 'Building Docker image...'
-        sh 'docker --context desktop-linux build -t devops-status-app .'
+        sh 'DOCKER_HOST=unix:///home/vardanreddy/.docker/desktop/docker.sock docker build -t devops-status-app .'
     }
 }
     }
