@@ -16,8 +16,7 @@ public class App {
         System.out.println("Version     : " + version);
         System.out.println("Environment : " + environment);
         System.out.println("Status      : " + status);
-        System.out.println("Application : " + Sucess);
-        System.out.println("Application : " + Sucess);
+        System.out.println("Application : " + sucess);
         System.out.println("     These Changes Are From Local");
         System.out.println("================================");
     }
